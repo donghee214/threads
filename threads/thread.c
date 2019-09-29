@@ -11,8 +11,26 @@ struct wait_queue {
 
 /* This is the thread control block */
 struct thread {
+	Tid tid;
+	ucontext context;
 	/* ... Fill this in ... */
 };
+
+
+thread* threads[THREAD_MAX_THREADS] = { NULL }
+int currentlyRunningThread = -1;
+
+Tid
+create_new_tid(void)
+{
+	for(int i = 0; i < THREAD_MAX_THREADS; i++){
+		if(threads[i] == NULL){
+			return i;
+		}
+	}
+	printf("No available threads");
+	return -1;
+}
 
 void
 thread_init(void)
@@ -23,14 +41,22 @@ thread_init(void)
 Tid
 thread_id()
 {
-	TBD();
-	return THREAD_INVALID;
+	if(currentlyRunningThread > -1){
+		return currentlyRunningThread;
+	}
+	printf("No running thread");
+	return -1;
 }
 
 Tid
 thread_create(void (*fn) (void *), void *parg)
 {
-	TBD();
+	int new_tid = create_new_tid();
+	if(new_tid == -1){
+		return THREAD_NOMORE
+	}
+	threads[new_tid] = (thread *)malloc(sizeof(thread));
+	currentlyRunningThread = new_tid
 	return THREAD_FAILED;
 }
 
@@ -44,7 +70,7 @@ thread_yield(Tid want_tid)
 void
 thread_exit()
 {
-	TBD();
+	
 }
 
 Tid
