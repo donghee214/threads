@@ -63,7 +63,7 @@ thread_id()
 void thread_stub(void (*fn)(void *), void *arg){
     Tid ret;
     fn(arg);
-    ret = thread_exit();
+    thread_exit();
 }
 
 Tid
@@ -71,55 +71,72 @@ thread_create(void (*fn) (void *), void *parg)
 {
 	int new_tid = search_threads(KILLED, 1);
 	if(new_tid == -1){
-            return THREAD_NOMORE;
+		return THREAD_NOMORE;
 	}
-	thread newThread = (thread *)malloc(sizeof(thread));
-        getcontext(newThread->context);
-        stack_t newStack = (stack_t)malloc(THREAD_MIN_STACK);
+	thread *newThread = (thread *)malloc(sizeof(thread));
+	getcontext(&(newThread->context));
+	stack_t newStack = (stack_t)malloc(THREAD_MIN_STACK);
 	newThread->stack = newStack;
-        newThread->status = READY;
-        threads[new_tid] = newThread;
-        threads[new_tid]->context.uc_mcontext.gregs[REG_RIP] = (long long int)(thread_stub);
-        threads[new_tid]->context.uc_mcontext.gregs[REG_RSP] = (long long int)newStack;
-        threads[new_tid]->context.uc_mcontext.gregs[REG_RDI] = (long long int)(fn);
-        threads[new_tid]->context.uc_mcontext.gregs[REG_RSI] = (long long int)(parg);
+	newThread->status = READY;
+	threads[new_tid] = newThread;
+	threads[new_tid]->context.uc_mcontext.gregs[REG_RIP] = (long long int)(thread_stub);
+	threads[new_tid]->context.uc_mcontext.gregs[REG_RSP] = (long long int)newStack;
+	threads[new_tid]->context.uc_mcontext.gregs[REG_RDI] = (long long int)(fn);
+	threads[new_tid]->context.uc_mcontext.gregs[REG_RSI] = (long long int)(parg);
 	return new_tid;
+}
+
+void switch_thread(Tid currThreadID, Tid newThreadId)
+{
+	getcontext(&(threads[currThreadID]->context));
+	setcontext(&(threads[newThreadId]-> context));
+	threads[currThreadID]->status = READY;
+	threads[newThreadId]->status = RUNNING;
 }
 
 Tid
 thread_yield(Tid want_tid)
 {
+	int currentlyRunningThread = search_threads(RUNNING, -1);
     if(want_tid == THREAD_ANY){
-        
+        int threadID = search_threads(READY, 1);
+		if(threadID == -1){
+			return THREAD_NONE;
+		}
+		switch_thread(currentlyRunningThread, threadID);
+		return threadID
     }
+	else{
+		switch_thread(currentlyRunningThread, want_tid);
+		return want_tid
+	}
 }
 
 void
 thread_exit()
 {
-    int currentlyRunningThreadTid = search_threads(RUNNING);
+    int currentlyRunningThreadTid = search_threads(RUNNING, -1);
     if (currentlyRunningThreadTid < 0){
         return THREAD_FAILED;
     }
     threads[currentlyRunningThreadTid]->status = KILLED;
     int readyThreadTid = search_threads(READY, -1);
-    if(readyThreadTid < 0){
-//        exit
-        TBD();
+    if(readyThreadTid == -1){
+		return THREAD_NONE;
     }
-    setcontext(threads[readyThreadTid]->context);
+    setcontext(&(threads[readyThreadTid]->context));
     threads[readyThreadTid]->status = RUNNING;
 }
 
 Tid
 thread_kill(Tid tid)
 {
-        int currentlyRunningThread = search_threads(RUNNING);
-        if(tid < 0 || tid == currentlyRunningThread){
+        int currentlyRunningThread = search_threads(RUNNING -1);
+        if(tid < 0 || tid == currentlyRunningThread || threads[tid] == NULL){
             return THREAD_INVALID;
         }
         threads[tid]->status = KILLED;
-	free(threads[tid]->stack);
+		free(threads[tid]->stack);
         free(threads[tid]);
         threads[tid] = NULL;
         return tid;
