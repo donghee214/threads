@@ -12,6 +12,8 @@
         <group>
             <file>file:/guest/k/kimdon96/ece344/threads/thread.h</file>
             <file>file:/guest/k/kimdon96/ece344/threads/show_ucontext.c</file>
+            <file>file:/guest/k/kimdon96/ece344/threads/test_basic.c</file>
+            <file>file:/guest/k/kimdon96/ece344/threads/test_thread.c</file>
             <file>file:/guest/k/kimdon96/ece344/threads/thread.c</file>
         </group>
     </open-files>
