@@ -24,10 +24,9 @@ struct thread {
 	/* ... Fill this in ... */
 };
 
-Tid readyQueue[THREAD_MAX_THREADS];
+Tid readyQueue[THREAD_MAX_THREADS] = { [ 0 ... THREAD_MAX_THREADS-1 ] = -1 };
 int readyQueueSize = THREAD_MAX_THREADS;
 int size = 0;
-int first = -1;
 int last = -1;
 struct thread *threads[THREAD_MAX_THREADS] = { NULL };
 
@@ -35,26 +34,31 @@ void queueReadyThread(Tid tid)
 {
     if(size < THREAD_MAX_THREADS)
     {
-		readyQueue[last+1] = tid;
-		last++;
-		size++;
-	}
+        readyQueue[last+1] = tid;
+        last++;
+        size++;
+    }
     else
     {
         printf("Queue is full\n");
     }
 }
 
-Tid getNextReady(Tid tid)
+Tid showNextReadyThread(){
+    return readyQueue[0];
+}
+
+Tid dequeueReadyThread()
 {
-	if(front == rear){
-		return -1
-	}
 	int ret = readyQueue[0];
-	for(int i = 0; i + 1 < last; i++){
-		readyQueue[i] = readyQueue[i + 1];
+	if(ret == -1){
+            return -1;
+        }
+        for(int i = 0; i + 1 < last; i++){
+            readyQueue[i] = readyQueue[i + 1];
 	}
 	last -= 1;
+        size--;
 	return ret;
 }
 
@@ -120,26 +124,33 @@ thread_create(void (*fn) (void *), void *parg)
         threads[new_tid]->context.uc_stack.ss_size = THREAD_MIN_STACK - 8;
         threads[new_tid]->context.uc_mcontext.gregs[REG_RDI] = (long long int)(fn);
 	threads[new_tid]->context.uc_mcontext.gregs[REG_RSI] = (long long int)(parg);
+        queueReadyThread(new_tid);
 	return new_tid;
 }
 
 void switch_thread(Tid currThreadID, Tid newThreadId)
 {
+    printf("%d", currThreadID);
+    printf("%d", newThreadId);
+    queueReadyThread(currThreadID);
     getcontext(&(threads[currThreadID]->context));
-    setcontext(&(threads[newThreadId]->context));
     threads[currThreadID]->status = READY;
     threads[newThreadId]->status = RUNNING;
+    setcontext(&(threads[newThreadId]->context));
 }
 
 Tid
 thread_yield(Tid want_tid)
-{
+{       
+        printf("want_tid: %d", want_tid);
 	int currentlyRunningThread = search_threads(RUNNING, -1);
         if (want_tid == THREAD_SELF){
             return currentlyRunningThread;
         }
         if(want_tid == THREAD_ANY){
-            int threadID = search_threads(READY, -1);
+            int threadID = dequeueReadyThread();
+            printf("next up : ");
+            printf("%d", threadID);
             if(threadID == -1){
                 return THREAD_NONE;
             }
