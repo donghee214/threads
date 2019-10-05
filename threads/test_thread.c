@@ -248,9 +248,9 @@ hello(char *msg)
 	printf("thread returns from second yield\n");
 
 	while (1) {
-            printf("\nabout to yield\n");
-            ret = thread_yield(THREAD_ANY);
-            printf("%d", ret);
+		printf("\nabout to yield\n");
+		ret = thread_yield(THREAD_ANY);
+		printf("%d", ret);
 	}
 
 }

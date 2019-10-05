@@ -174,16 +174,16 @@ thread_yield(Tid want_tid)
         }
 		else{
 			if(setcontextCalledThreads[currentlyRunningThread] == 0){
+				int threadID = dequeueReadyThread();
 				setcontextCalledThreads[currentlyRunningThread] = 1;
 				threads[currentlyRunningThread]->status = READY;
 				threads[currentlyRunningThread]->status = RUNNING;
-				setcontext(&(threads[want_tid]->context));
+				setcontext(&(threads[threadID]->context));
 			}
 			else{
 				setcontextCalledThreads[currentlyRunningThread] = 0;
-				return want_tid;
+				return threadID;
 			}
-			return want_tid;
 		}
 }
 
