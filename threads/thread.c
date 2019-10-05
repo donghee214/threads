@@ -185,6 +185,7 @@ thread_yield(Tid want_tid)
 				return threadID;
 			}
 		}
+	return THREAD_NONE;
 }
 
 void
