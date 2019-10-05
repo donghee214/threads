@@ -181,7 +181,7 @@ thread_yield(Tid want_tid)
 			}
 			else{
 				setcontextCalledThreads[currentlyRunningThread] = 0;
-				return want_tid
+				return want_tid;
 			}
 			return want_tid;
 		}
