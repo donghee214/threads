@@ -24,8 +24,39 @@ struct thread {
 	/* ... Fill this in ... */
 };
 
-struct thread readyQueue[THREAD_MAX_THREADS];
+Tid readyQueue[THREAD_MAX_THREADS];
+int readyQueueSize = THREAD_MAX_THREADS;
+int size = 0;
+int first = -1;
+int last = -1;
 struct thread *threads[THREAD_MAX_THREADS] = { NULL };
+
+void queueReadyThread(Tid tid)
+{
+    if(size < THREAD_MAX_THREADS)
+    {
+		readyQueue[last+1] = tid;
+		last++;
+		size++;
+	}
+    else
+    {
+        printf("Queue is full\n");
+    }
+}
+
+Tid getNextReady(Tid tid)
+{
+	if(front == rear){
+		return -1
+	}
+	int ret = readyQueue[0];
+	for(int i = 0; i + 1 < last; i++){
+		readyQueue[i] = readyQueue[i + 1];
+	}
+	last -= 1;
+	return ret;
+}
 
 Tid
 search_threads(TStatus status, int searchForNull)
