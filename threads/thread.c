@@ -28,6 +28,7 @@ Tid readyQueue[THREAD_MAX_THREADS] = { [ 0 ... THREAD_MAX_THREADS-1 ] = -1 };
 int readyQueueSize = THREAD_MAX_THREADS;
 int size = 0;
 int last = -1;
+int setcontextCalledThreads[THREAD_MAX_THREADS];
 struct thread *threads[THREAD_MAX_THREADS] = { NULL };
 
 void queueReadyThread(Tid tid)
@@ -114,26 +115,25 @@ thread_create(void (*fn) (void *), void *parg)
 	struct thread *newThread = (struct thread *)malloc(sizeof(struct thread));
 	getcontext(&(newThread->context));
 	void *newStack = malloc(THREAD_MIN_STACK);
-        newThread->tid = new_tid;
+	newThread->tid = new_tid;
 	newThread->stack = newStack;
 	newThread->status = READY;
 	threads[new_tid] = newThread;
 	threads[new_tid]->context.uc_mcontext.gregs[REG_RIP] = (long long int)(thread_stub);
 	threads[new_tid]->context.uc_mcontext.gregs[REG_RSP] = (long long int)newStack + THREAD_MIN_STACK - 8;
 	threads[new_tid]->context.uc_stack.ss_sp = newStack;
-        threads[new_tid]->context.uc_stack.ss_size = THREAD_MIN_STACK - 8;
-        threads[new_tid]->context.uc_mcontext.gregs[REG_RDI] = (long long int)(fn);
+	threads[new_tid]->context.uc_stack.ss_size = THREAD_MIN_STACK - 8;
+	threads[new_tid]->context.uc_mcontext.gregs[REG_RDI] = (long long int)(fn);
 	threads[new_tid]->context.uc_mcontext.gregs[REG_RSI] = (long long int)(parg);
-        queueReadyThread(new_tid);
+	queueReadyThread(new_tid);
 	return new_tid;
 }
 
 void switch_thread(Tid currThreadID, Tid newThreadId)
 {
-    printf("%d", currThreadID);
-    printf("%d", newThreadId);
     queueReadyThread(currThreadID);
     getcontext(&(threads[currThreadID]->context));
+	setcontextCalledThreads[currThreadID] = 1;
     threads[currThreadID]->status = READY;
     threads[newThreadId]->status = RUNNING;
     setcontext(&(threads[newThreadId]->context));
@@ -142,19 +142,21 @@ void switch_thread(Tid currThreadID, Tid newThreadId)
 Tid
 thread_yield(Tid want_tid)
 {       
-        printf("want_tid: %d", want_tid);
-	int currentlyRunningThread = search_threads(RUNNING, -1);
+		int currentlyRunningThread = search_threads(RUNNING, -1);
         if (want_tid == THREAD_SELF){
             return currentlyRunningThread;
         }
         if(want_tid == THREAD_ANY){
             int threadID = dequeueReadyThread();
-            printf("next up : ");
-            printf("%d", threadID);
             if(threadID == -1){
                 return THREAD_NONE;
             }
-            switch_thread(currentlyRunningThread, threadID);
+			if(setcontextCalledThreads[currentlyRunningThread] == 0){
+				switch_thread(currentlyRunningThread, threadID);
+			}
+			else{
+				setcontextCalledThreads[currentlyRunningThread] = 0;
+			}
             return threadID;
         }
         if (want_tid == currentlyRunningThread){
@@ -166,10 +168,15 @@ thread_yield(Tid want_tid)
         if (threads[want_tid] == NULL){
             return THREAD_INVALID;
         }
-	else{
-            switch_thread(currentlyRunningThread, want_tid);
-            return want_tid;
-	}
+		else{
+			if(setcontextCalledThreads[currentlyRunningThread] == 0){
+				switch_thread(currentlyRunningThread, want_tid);
+			}
+			else{
+				setcontextCalledThreads[currentlyRunningThread] = 0;
+			}
+			return want_tid;
+		}
 }
 
 void
