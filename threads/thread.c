@@ -195,6 +195,7 @@ thread_yield(Tid want_tid)
 	}
 	else{
 		queueReadyThread(currentlyRunningThread);
+		printf("threadId, %d\n", want_tid);
 		getcontext(&(threads[currentlyRunningThread]->context));
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			threads[currentlyRunningThread]->status = READY;
@@ -205,7 +206,7 @@ thread_yield(Tid want_tid)
 		else{
 			threads[currentlyRunningThread]->setcontext_called = 0;
 			interrupts_set(interrupts_status);
-			return threadID;
+			return want_tid;
 		}
 	}
 	interrupts_set(interrupts_status);
