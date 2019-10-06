@@ -155,6 +155,7 @@ thread_yield(Tid want_tid)
 	if(want_tid == THREAD_ANY){
 		getcontext(&(threads[currentlyRunningThread]->context));
 		int threadID = dequeueReadyThread();
+		printf("threadId, %d", threadID);
 		if(threadID == -1){
 			interrupts_set(1);
 			return THREAD_NONE;
