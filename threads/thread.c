@@ -71,7 +71,7 @@ Tid dequeueIdReadyThread(Tid id)
 	}
 	last --;
 	size --;
-	return id
+	return id;
 }
 
 void displayReadyQueue(){
