@@ -25,7 +25,7 @@ struct thread {
 	/* ... Fill this in ... */
 };
 
-volatile Tid readyQueue[THREAD_MAX_THREADS] = { [ 0 ... THREAD_MAX_THREADS-1 ] = -1 };
+Tid readyQueue[THREAD_MAX_THREADS] = { [ 0 ... THREAD_MAX_THREADS-1 ] = -1 };
 int readyQueueSize = THREAD_MAX_THREADS;
 int size = 0;
 int last = 0;
@@ -59,9 +59,15 @@ Tid dequeueReadyThread()
 	for(int i = 0; i < last; i++){
 		readyQueue[i] = readyQueue[i + 1];
 	}
-	last -= 1;
+	last--;
 	size--;
 	return ret;
+}
+
+void displayReadyQueue(){
+	for(int i = 0; i < 10; i++){
+		printf("%d", readyQueue[i]);
+	}
 }
 
 Tid
@@ -165,6 +171,7 @@ thread_yield(Tid want_tid)
 		return THREAD_INVALID;
 	}
 	int threadID = dequeueReadyThread();
+	displayReadyQueue();
 	printf("threadId, %d\n", threadID);
 	if(want_tid == THREAD_ANY){
 		if(threadID == -1){
