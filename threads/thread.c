@@ -184,7 +184,7 @@ thread_yield(Tid want_tid)
 			threads[currentlyRunningThread]->status = READY;
 			threads[currentlyRunningThread]->status = RUNNING;
 			threads[currentlyRunningThread]->setcontext_called = 1;
-			setcontext(&(threads[want_tid]->context));
+			setcontext(&(threads[threadID]->context));
 		}
 		else{
 			assert(!interrupts_enabled());
@@ -200,7 +200,7 @@ thread_yield(Tid want_tid)
 			threads[currentlyRunningThread]->status = READY;
 			threads[currentlyRunningThread]->status = RUNNING;
 			threads[currentlyRunningThread]->setcontext_called = 1;
-			setcontext(&(threads[threadID]->context));
+			setcontext(&(threads[want_tid]->context));
 		}
 		else{
 			threads[currentlyRunningThread]->setcontext_called = 0;
