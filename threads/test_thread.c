@@ -246,8 +246,10 @@ hello(char *msg)
 	ret = thread_yield(THREAD_SELF);
 	assert(thread_ret_ok(ret));
 	printf("thread returns from second yield\n");
-	while (1) {
+	int i = 0;
+	while (i) {
 		ret = thread_yield(THREAD_ANY);
+		i++;
 	}
 
 }
