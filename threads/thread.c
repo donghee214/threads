@@ -149,6 +149,7 @@ thread_yield(Tid want_tid)
 	interrupts_off();
 	int currentlyRunningThread = search_threads(RUNNING, -1);
 	if (want_tid == THREAD_SELF){
+		interrupts_set(1);
 		return currentlyRunningThread;
 	}
 	if(want_tid == THREAD_ANY){
