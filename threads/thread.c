@@ -157,6 +157,7 @@ thread_yield(Tid want_tid)
 		}
 		getcontext(&(threads[currentlyRunningThread]->context));
 		printf("\ncurrent setcontext_called value: %d\n", threads[currentlyRunningThread]->setcontext_called);
+		printf("current threads value: %d\n", currentlyRunningThread);
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			threads[currentlyRunningThread]->status = READY;
 			threads[currentlyRunningThread]->status = RUNNING;
