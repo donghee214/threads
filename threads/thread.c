@@ -109,9 +109,7 @@ thread_id()
 
 void thread_stub(void (*fn)(void *), void *arg){
 	interrupts_set(1);
-	printf("entering function");
     fn(arg);
-	printf("exiting thread");
     thread_exit();
 }
 
@@ -173,8 +171,8 @@ thread_yield(Tid want_tid)
 	
 	if(want_tid == THREAD_ANY){
 		int threadID = readyQueue[0];
-		printf("current thread, %d", currentlyRunningThread);
-		printf("threadId, %d\n", threadID);
+		// printf("current thread, %d", currentlyRunningThread);
+		// printf("threadId, %d\n", threadID);
 		if(threadID == -1){
 			interrupts_set(interrupts_status);
 			return THREAD_NONE;
@@ -197,8 +195,8 @@ thread_yield(Tid want_tid)
 	}
 	else{
 		queueReadyThread(currentlyRunningThread);
-		printf("current thread, %d", currentlyRunningThread);
-		printf("threadId, %d\n", want_tid);
+		// printf("current thread, %d", currentlyRunningThread);
+		// printf("threadId, %d\n", want_tid);
 		getcontext(&(threads[currentlyRunningThread]->context));
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			threads[currentlyRunningThread]->status = READY;
@@ -219,7 +217,7 @@ thread_yield(Tid want_tid)
 void
 thread_exit()
 {
-	printf("EXITING");
+	// printf("EXITING");
     int currentlyRunningThreadTid = search_threads(RUNNING, -1);
     if (currentlyRunningThreadTid < 0){
         exit(0);
