@@ -56,7 +56,7 @@ Tid dequeueReadyThread()
 	if(ret == -1){
 		return -1;
 	}
-	for(int i = 0; i < last - 1; i++){
+	for(int i = 0; i < last; i++){
 		readyQueue[i] = readyQueue[i + 1];
 	}
 	last -= 1;
