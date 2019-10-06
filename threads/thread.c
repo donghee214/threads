@@ -20,6 +20,7 @@ struct thread {
     Tid tid;
     ucontext_t context;
     void *stack;
+	volatile int setcontext_called = 0;
     TStatus status;
 	/* ... Fill this in ... */
 };
@@ -28,7 +29,7 @@ Tid readyQueue[THREAD_MAX_THREADS] = { [ 0 ... THREAD_MAX_THREADS-1 ] = -1 };
 int readyQueueSize = THREAD_MAX_THREADS;
 int size = 0;
 int last = -1;
-volatile int setcontextCalledThreads[THREAD_MAX_THREADS];
+// volatile int setcontextCalledThreads[THREAD_MAX_THREADS];
 struct thread *threads[THREAD_MAX_THREADS] = { NULL };
 
 void queueReadyThread(Tid tid)
@@ -118,6 +119,7 @@ thread_create(void (*fn) (void *), void *parg)
 	newThread->tid = new_tid;
 	newThread->stack = newStack;
 	newThread->status = READY;
+	newThread->setcontext_called = 0;
 	threads[new_tid] = newThread;
 	threads[new_tid]->context.uc_mcontext.gregs[REG_RIP] = (long long int)(thread_stub);
 	threads[new_tid]->context.uc_mcontext.gregs[REG_RSP] = (long long int)newStack + THREAD_MIN_STACK - 8;
@@ -154,14 +156,15 @@ thread_yield(Tid want_tid)
 			return THREAD_NONE;
 		}
 		getcontext(&(threads[currentlyRunningThread]->context));
-		if(setcontextCalledThreads[currentlyRunningThread] == 0){
+		printf("current setcontext_called value: %d", threads[currentlyRunningThread]->setcontext_called)
+		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			setcontextCalledThreads[currentlyRunningThread] = 1;
 			threads[currentlyRunningThread]->status = READY;
 			threads[currentlyRunningThread]->status = RUNNING;
 			setcontext(&(threads[want_tid]->context));
 		}
 		else{
-			setcontextCalledThreads[currentlyRunningThread] = 0;
+			threads[currentlyRunningThread]->setcontext_called = 0;
 			interrupts_set(1);
 			return threadID;
 		}
@@ -181,14 +184,14 @@ thread_yield(Tid want_tid)
 	else{
 		getcontext(&(threads[currentlyRunningThread]->context));
 		int threadID = dequeueReadyThread();
-		if(setcontextCalledThreads[currentlyRunningThread] == 0){
+		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			setcontextCalledThreads[currentlyRunningThread] = 1;
 			threads[currentlyRunningThread]->status = READY;
 			threads[currentlyRunningThread]->status = RUNNING;
 			setcontext(&(threads[threadID]->context));
 		}
 		else{
-			setcontextCalledThreads[currentlyRunningThread] = 0;
+			threads[currentlyRunningThread]->setcontext_called = 0;
 			interrupts_set(1);
 			return threadID;
 		}
