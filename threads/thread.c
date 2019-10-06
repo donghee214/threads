@@ -184,7 +184,7 @@ thread_yield(Tid want_tid)
 		getcontext(&(threads[currentlyRunningThread]->context));
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			threads[currentlyRunningThread]->status = READY;
-			threads[currentlyRunningThread]->status = RUNNING;
+			threads[threadID]->status = RUNNING;
 			threads[currentlyRunningThread]->setcontext_called = 1;
 			setcontext(&(threads[threadID]->context));
 		}
@@ -202,7 +202,7 @@ thread_yield(Tid want_tid)
 		getcontext(&(threads[currentlyRunningThread]->context));
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			threads[currentlyRunningThread]->status = READY;
-			threads[currentlyRunningThread]->status = RUNNING;
+			threads[threadID]->status = RUNNING;
 			threads[currentlyRunningThread]->setcontext_called = 1;
 			setcontext(&(threads[want_tid]->context));
 		}
