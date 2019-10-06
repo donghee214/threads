@@ -20,7 +20,7 @@ struct thread {
     Tid tid;
     ucontext_t context;
     void *stack;
-	volatile int setcontext_called;
+	int setcontext_called;
     TStatus status;
 	/* ... Fill this in ... */
 };
