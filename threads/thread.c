@@ -160,7 +160,7 @@ thread_yield(Tid want_tid)
 		interrupts_set(interrupts_status);
 		return THREAD_INVALID;
 	}
-	if (threads[want_tid] == NULL){
+	if (want_tid > 0 && threads[want_tid] == NULL){
 		interrupts_set(interrupts_status);
 		return THREAD_INVALID;
 	}
