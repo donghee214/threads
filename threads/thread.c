@@ -28,7 +28,7 @@ struct thread {
 Tid readyQueue[THREAD_MAX_THREADS] = { [ 0 ... THREAD_MAX_THREADS-1 ] = -1 };
 int readyQueueSize = THREAD_MAX_THREADS;
 int size = 0;
-int last = -1;
+int last = 0;
 // volatile int setcontextCalledThreads[THREAD_MAX_THREADS];
 struct thread *threads[THREAD_MAX_THREADS] = { NULL };
 
@@ -36,7 +36,7 @@ void queueReadyThread(Tid tid)
 {
     if(size < THREAD_MAX_THREADS)
     {
-        readyQueue[last+1] = tid;
+        readyQueue[last] = tid;
         last++;
         size++;
     }
@@ -54,13 +54,13 @@ Tid dequeueReadyThread()
 {
 	int ret = readyQueue[0];
 	if(ret == -1){
-            return -1;
-        }
-        for(int i = 0; i + 1 < last; i++){
-            readyQueue[i] = readyQueue[i + 1];
+		return -1;
+	}
+	for(int i = 0; i < last - 1; i++){
+		readyQueue[i] = readyQueue[i + 1];
 	}
 	last -= 1;
-        size--;
+	size--;
 	return ret;
 }
 
