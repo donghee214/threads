@@ -89,7 +89,7 @@ thread_init(void)
     initialThread->tid = 0;
     initialThread->status = RUNNING;
     threads[0] = initialThread;
-	getcontext(&(thread_index[0]->context));
+	getcontext(&(threads[0]->context));
 }
 
 Tid
