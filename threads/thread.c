@@ -170,6 +170,7 @@ thread_yield(Tid want_tid)
 		else{
 			threads[currentlyRunningThread]->setcontext_called = 0;
 			interrupts_set(1);
+			printf("\n returning from %d", threadID)
 			return threadID;
 		}
 	}
