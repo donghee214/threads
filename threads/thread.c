@@ -185,7 +185,6 @@ thread_yield(Tid want_tid)
 			assert(!interrupts_enabled());
 			threads[currentlyRunningThread]->setcontext_called = 0;
 			interrupts_set(1);
-			printf("\n returning from %d", threadID);
 			interrupts_set(interrupts_status);
 			return threadID;
 		}
