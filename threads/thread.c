@@ -156,7 +156,7 @@ thread_yield(Tid want_tid)
 		interrupts_set(interrupts_status);
 		return currentlyRunningThread;
 	}
-	if (want_tid < 0 || want_tid > THREAD_MAX_THREADS){
+	if (want_tid < -2 || want_tid > THREAD_MAX_THREADS){
 		interrupts_set(interrupts_status);
 		return THREAD_INVALID;
 	}
