@@ -170,8 +170,8 @@ thread_yield(Tid want_tid)
 		interrupts_set(interrupts_status);
 		return THREAD_INVALID;
 	}
-	int threadID = dequeueReadyThread();
 	displayReadyQueue();
+	int threadID = dequeueReadyThread();
 	printf("threadId, %d\n", threadID);
 	if(want_tid == THREAD_ANY){
 		if(threadID == -1){
