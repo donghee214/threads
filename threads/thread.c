@@ -179,7 +179,7 @@ thread_yield(Tid want_tid)
 			interrupts_set(interrupts_status);
 			return THREAD_NONE;
 		}
-		int threadID = dequeueReadyThread();
+		threadID = dequeueReadyThread();
 		queueReadyThread(currentlyRunningThread);
 		getcontext(&(threads[currentlyRunningThread]->context));
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
