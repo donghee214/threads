@@ -135,7 +135,6 @@ void switch_thread(Tid currThreadID, Tid newThreadId)
 {
     queueReadyThread(currThreadID);
     getcontext(&(threads[currThreadID]->context));
-	setcontextCalledThreads[currThreadID] = 1;
     threads[currThreadID]->status = READY;
     threads[newThreadId]->status = RUNNING;
     setcontext(&(threads[newThreadId]->context));
