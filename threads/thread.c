@@ -103,7 +103,9 @@ thread_id()
 
 void thread_stub(void (*fn)(void *), void *arg){
 	interrupts_set(1);
+	printf("entering function");
     fn(arg);
+	printf("exiting thread");
     thread_exit();
 }
 
@@ -122,7 +124,7 @@ thread_create(void (*fn) (void *), void *parg)
 	newThread->status = READY;
 	newThread->setcontext_called = 0;
 	threads[new_tid] = newThread;
-	threads[new_tid]->context.uc_mcontext.gregs[REG_RIP] = (long long int)(thread_stub);
+	threads[new_tid]->context.uc_mcontext.gregs[REG_RIP] = (long long int)&thread_stub;
 	threads[new_tid]->context.uc_mcontext.gregs[REG_RSP] = (long long int)newStack + THREAD_MIN_STACK - 8;
 	threads[new_tid]->context.uc_stack.ss_sp = newStack;
 	threads[new_tid]->context.uc_stack.ss_size = THREAD_MIN_STACK - 8;
