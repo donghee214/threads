@@ -209,10 +209,14 @@ thread_exit()
     threads[currentlyRunningThreadTid]->status = KILLED;
     int readyThreadTid = dequeueReadyThread();
     if(readyThreadTid == -1){
+		printf("EXITING");
        exit(0);
     }
-    setcontext(&(threads[readyThreadTid]->context));
-    threads[readyThreadTid]->status = RUNNING;
+	else{
+		setcontext(&(threads[readyThreadTid]->context));
+		threads[readyThreadTid]->status = RUNNING;
+	}
+
 }
 
 Tid
