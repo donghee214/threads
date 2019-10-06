@@ -64,6 +64,16 @@ Tid dequeueReadyThread()
 	return ret;
 }
 
+Tid dequeueIdReadyThread(Tid id)
+{
+	for(int i = id; i < last; i++){
+		readyQueue[i] = readyQueue[i + 1];
+	}
+	last --;
+	size --;
+	return id
+}
+
 void displayReadyQueue(){
 	for(int i = 0; i < 200; i++){
 		printf("%d", readyQueue[i]);
@@ -197,6 +207,7 @@ thread_yield(Tid want_tid)
 		printf("current thread, %d", currentlyRunningThread);
 		printf("next threadId, %d\n", want_tid);
 		getcontext(&(threads[currentlyRunningThread]->context));
+		dequeueIdReadyThread(want_tid);
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			threads[currentlyRunningThread]->status = READY;
 			threads[want_tid]->status = RUNNING;
