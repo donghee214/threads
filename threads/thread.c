@@ -142,50 +142,58 @@ void switch_thread(Tid currThreadID, Tid newThreadId)
 Tid
 thread_yield(Tid want_tid)
 {       
-		int currentlyRunningThread = search_threads(RUNNING, -1);
-        if (want_tid == THREAD_SELF){
-            return currentlyRunningThread;
-        }
-        if(want_tid == THREAD_ANY){
-            int threadID = dequeueReadyThread();
-            if(threadID == -1){
-                return THREAD_NONE;
-            }
-			getcontext(&(threads[currentlyRunningThread]->context));
-			if(setcontextCalledThreads[currentlyRunningThread] == 0){
-				setcontextCalledThreads[currentlyRunningThread] = 1;
-				threads[currentlyRunningThread]->status = READY;
-				threads[currentlyRunningThread]->status = RUNNING;
-				setcontext(&(threads[want_tid]->context));
-			}
-			else{
-				setcontextCalledThreads[currentlyRunningThread] = 0;
-				return threadID;
-			}
-        }
-        if (want_tid == currentlyRunningThread){
-            return currentlyRunningThread;
-        }
-        if (want_tid < 0 || want_tid > THREAD_MAX_THREADS){
-            return THREAD_INVALID;
-        }
-        if (threads[want_tid] == NULL){
-            return THREAD_INVALID;
-        }
-		else{
-			getcontext(&(threads[currentlyRunningThread]->context));
-			int threadID = dequeueReadyThread();
-			if(setcontextCalledThreads[currentlyRunningThread] == 0){
-				setcontextCalledThreads[currentlyRunningThread] = 1;
-				threads[currentlyRunningThread]->status = READY;
-				threads[currentlyRunningThread]->status = RUNNING;
-				setcontext(&(threads[threadID]->context));
-			}
-			else{
-				setcontextCalledThreads[currentlyRunningThread] = 0;
-				return threadID;
-			}
+	interrupts_off();
+	int currentlyRunningThread = search_threads(RUNNING, -1);
+	if (want_tid == THREAD_SELF){
+		return currentlyRunningThread;
+	}
+	if(want_tid == THREAD_ANY){
+		int threadID = dequeueReadyThread();
+		if(threadID == -1){
+			interrupts_set(1);
+			return THREAD_NONE;
 		}
+		getcontext(&(threads[currentlyRunningThread]->context));
+		if(setcontextCalledThreads[currentlyRunningThread] == 0){
+			setcontextCalledThreads[currentlyRunningThread] = 1;
+			threads[currentlyRunningThread]->status = READY;
+			threads[currentlyRunningThread]->status = RUNNING;
+			setcontext(&(threads[want_tid]->context));
+		}
+		else{
+			setcontextCalledThreads[currentlyRunningThread] = 0;
+			interrupts_set(1);
+			return threadID;
+		}
+	}
+	if (want_tid == currentlyRunningThread){
+		interrupts_set(1);
+		return currentlyRunningThread;
+	}
+	if (want_tid < 0 || want_tid > THREAD_MAX_THREADS){
+		interrupts_set(1);
+		return THREAD_INVALID;
+	}
+	if (threads[want_tid] == NULL){
+		interrupts_set(1);
+		return THREAD_INVALID;
+	}
+	else{
+		getcontext(&(threads[currentlyRunningThread]->context));
+		int threadID = dequeueReadyThread();
+		if(setcontextCalledThreads[currentlyRunningThread] == 0){
+			setcontextCalledThreads[currentlyRunningThread] = 1;
+			threads[currentlyRunningThread]->status = READY;
+			threads[currentlyRunningThread]->status = RUNNING;
+			setcontext(&(threads[threadID]->context));
+		}
+		else{
+			setcontextCalledThreads[currentlyRunningThread] = 0;
+			interrupts_set(1);
+			return threadID;
+		}
+	}
+	interrupts_on();
 	return THREAD_NONE;
 }
 
