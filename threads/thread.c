@@ -173,7 +173,7 @@ thread_yield(Tid want_tid)
 	
 	if(want_tid == THREAD_ANY){
 		int threadID = readyQueue[0];
-		printf("current thread, %d", currentlyRunningThread)
+		printf("current thread, %d", currentlyRunningThread);
 		printf("threadId, %d\n", threadID);
 		if(threadID == -1){
 			interrupts_set(interrupts_status);
@@ -197,7 +197,7 @@ thread_yield(Tid want_tid)
 	}
 	else{
 		queueReadyThread(currentlyRunningThread);
-		printf("current thread, %d", currentlyRunningThread)
+		printf("current thread, %d", currentlyRunningThread);
 		printf("threadId, %d\n", want_tid);
 		getcontext(&(threads[currentlyRunningThread]->context));
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
