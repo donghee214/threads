@@ -164,15 +164,14 @@ thread_yield(Tid want_tid)
 		interrupts_set(interrupts_status);
 		return THREAD_INVALID;
 	}
+	int threadID = dequeueReadyThread();
+	printf("threadId, %d\n", threadID);
 	if(want_tid == THREAD_ANY){
-		int threadID = dequeueReadyThread();
-		printf("threadId, %d\n", threadID);
 		if(threadID == -1){
 			interrupts_set(interrupts_status);
 			return THREAD_NONE;
 		}
-		// printf("\ncurrent setcontext_called value: %d\n", threads[currentlyRunningThread]->setcontext_called);
-		// printf("current threads value: %d\n", currentlyRunningThread);
+		printf("current threads value: %d\n", currentlyRunningThread);
 		queueReadyThread(currentlyRunningThread);
 		getcontext(&(threads[currentlyRunningThread]->context));
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
@@ -184,7 +183,6 @@ thread_yield(Tid want_tid)
 		else{
 			assert(!interrupts_enabled());
 			threads[currentlyRunningThread]->setcontext_called = 0;
-			interrupts_set(1);
 			interrupts_set(interrupts_status);
 			return threadID;
 		}
@@ -192,7 +190,6 @@ thread_yield(Tid want_tid)
 	else{
 		queueReadyThread(currentlyRunningThread);
 		getcontext(&(threads[currentlyRunningThread]->context));
-		int threadID = dequeueReadyThread();
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			threads[currentlyRunningThread]->status = READY;
 			threads[currentlyRunningThread]->status = RUNNING;
@@ -201,7 +198,7 @@ thread_yield(Tid want_tid)
 		}
 		else{
 			threads[currentlyRunningThread]->setcontext_called = 0;
-			interrupts_set(1);
+			interrupts_set(interrupts_status);
 			return threadID;
 		}
 	}
