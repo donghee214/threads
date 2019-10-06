@@ -89,7 +89,6 @@ thread_init(void)
     initialThread->tid = 0;
     initialThread->status = RUNNING;
     threads[0] = initialThread;
-	getcontext(&(threads[0]->context));
 }
 
 Tid
@@ -147,22 +146,34 @@ void switch_thread(Tid currThreadID, Tid newThreadId)
 Tid
 thread_yield(Tid want_tid)
 {       
-	interrupts_off();
+	int interrupts_status = interrupts_set(0);
 	int currentlyRunningThread = search_threads(RUNNING, -1);
 	if (want_tid == THREAD_SELF){
-		interrupts_set(1);
+		interrupts_set(interrupts_status);
 		return currentlyRunningThread;
 	}
+	if (want_tid == currentlyRunningThread){
+		interrupts_set(interrupts_status);
+		return currentlyRunningThread;
+	}
+	if (want_tid < 0 || want_tid > THREAD_MAX_THREADS){
+		interrupts_set(interrupts_status);
+		return THREAD_INVALID;
+	}
+	if (threads[want_tid] == NULL){
+		interrupts_set(interrupts_status);
+		return THREAD_INVALID;
+	}
 	if(want_tid == THREAD_ANY){
-		getcontext(&(threads[currentlyRunningThread]->context));
 		int threadID = dequeueReadyThread();
 		printf("threadId, %d\n", threadID);
 		if(threadID == -1){
-			interrupts_set(1);
+			interrupts_set(interrupts_status);
 			return THREAD_NONE;
 		}
 		// printf("\ncurrent setcontext_called value: %d\n", threads[currentlyRunningThread]->setcontext_called);
 		// printf("current threads value: %d\n", currentlyRunningThread);
+		getcontext(&(threads[currentlyRunningThread]->context));
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			threads[currentlyRunningThread]->status = READY;
 			threads[currentlyRunningThread]->status = RUNNING;
@@ -170,23 +181,13 @@ thread_yield(Tid want_tid)
 			setcontext(&(threads[want_tid]->context));
 		}
 		else{
+			assert(!interrupts_enabled());
 			threads[currentlyRunningThread]->setcontext_called = 0;
 			interrupts_set(1);
 			printf("\n returning from %d", threadID);
+			interrupts_set(interrupts_status);
 			return threadID;
 		}
-	}
-	if (want_tid == currentlyRunningThread){
-		interrupts_set(1);
-		return currentlyRunningThread;
-	}
-	if (want_tid < 0 || want_tid > THREAD_MAX_THREADS){
-		interrupts_set(1);
-		return THREAD_INVALID;
-	}
-	if (threads[want_tid] == NULL){
-		interrupts_set(1);
-		return THREAD_INVALID;
 	}
 	else{
 		getcontext(&(threads[currentlyRunningThread]->context));
@@ -203,7 +204,7 @@ thread_yield(Tid want_tid)
 			return threadID;
 		}
 	}
-	interrupts_on();
+	interrupts_set(interrupts_status);
 	return THREAD_NONE;
 }
 
