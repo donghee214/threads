@@ -150,7 +150,7 @@ Tid
 thread_yield(Tid want_tid)
 {       
 	int interrupts_status = interrupts_set(0);
-	displayReadyQueue()
+	displayReadyQueue();
 	int currentlyRunningThread = search_threads(RUNNING, -1);
 	if (want_tid == THREAD_SELF){
 		interrupts_set(interrupts_status);
