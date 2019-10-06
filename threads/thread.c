@@ -155,11 +155,12 @@ thread_yield(Tid want_tid)
 			return THREAD_NONE;
 		}
 		getcontext(&(threads[currentlyRunningThread]->context));
-		printf("current setcontext_called value: %d", threads[currentlyRunningThread]->setcontext_called)
+		printf("current setcontext_called value: %d", threads[currentlyRunningThread]->setcontext_called);
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			setcontextCalledThreads[currentlyRunningThread] = 1;
 			threads[currentlyRunningThread]->status = READY;
 			threads[currentlyRunningThread]->status = RUNNING;
+			threads[currentlyRunningThread]->setcontext_called = 1;
 			setcontext(&(threads[want_tid]->context));
 		}
 		else{
@@ -184,9 +185,9 @@ thread_yield(Tid want_tid)
 		getcontext(&(threads[currentlyRunningThread]->context));
 		int threadID = dequeueReadyThread();
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
-			setcontextCalledThreads[currentlyRunningThread] = 1;
 			threads[currentlyRunningThread]->status = READY;
 			threads[currentlyRunningThread]->status = RUNNING;
+			threads[currentlyRunningThread]->setcontext_called = 1;
 			setcontext(&(threads[threadID]->context));
 		}
 		else{
