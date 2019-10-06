@@ -102,6 +102,7 @@ thread_id()
 }
 
 void thread_stub(void (*fn)(void *), void *arg){
+	interrupts_set(1);
     fn(arg);
     thread_exit();
 }
@@ -202,6 +203,7 @@ thread_yield(Tid want_tid)
 void
 thread_exit()
 {
+	printf("EXITING");
     int currentlyRunningThreadTid = search_threads(RUNNING, -1);
     if (currentlyRunningThreadTid < 0){
         exit(0);
@@ -209,7 +211,6 @@ thread_exit()
     threads[currentlyRunningThreadTid]->status = KILLED;
     int readyThreadTid = dequeueReadyThread();
     if(readyThreadTid == -1){
-		printf("EXITING");
        exit(0);
     }
 	else{
