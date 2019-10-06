@@ -207,7 +207,7 @@ thread_exit()
         exit(0);
     }
     threads[currentlyRunningThreadTid]->status = KILLED;
-    int readyThreadTid = search_threads(READY, -1);
+    int readyThreadTid = dequeueReadyThread();
     if(readyThreadTid == -1){
        exit(0);
     }
