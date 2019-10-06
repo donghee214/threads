@@ -65,7 +65,7 @@ Tid dequeueReadyThread()
 }
 
 void displayReadyQueue(){
-	for(int i = 0; i < 10; i++){
+	for(int i = 0; i < 200; i++){
 		printf("%d", readyQueue[i]);
 	}
 }
@@ -84,7 +84,6 @@ search_threads(TStatus status, int searchForNull)
             return i;
         }
     }
-    printf("No available threads");
     return -1;
 }
 
@@ -151,6 +150,7 @@ Tid
 thread_yield(Tid want_tid)
 {       
 	int interrupts_status = interrupts_set(0);
+	displayReadyQueue()
 	int currentlyRunningThread = search_threads(RUNNING, -1);
 	if (want_tid == THREAD_SELF){
 		interrupts_set(interrupts_status);
