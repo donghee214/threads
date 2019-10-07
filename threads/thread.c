@@ -101,6 +101,7 @@ search_threads(TStatus status, int searchForNull)
             return i;
         }
     }
+	printf("'CANT FIND THREAD");
     return -1;
 }
 
