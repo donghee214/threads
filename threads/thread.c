@@ -246,13 +246,14 @@ thread_yield(Tid want_tid)
 void
 thread_exit()
 {
-	printf("EXITING");
+	printf("EXITING, NEXT UP: ");
     int currentlyRunningThreadTid = search_threads(RUNNING, -1);
     if (currentlyRunningThreadTid < 0){
         exit(0);
     }
     threads[currentlyRunningThreadTid]->status = KILLED;
     int readyThreadTid = dequeueReadyThread();
+	printf("%d", readyThreadTid);
     if(readyThreadTid == -1){
        exit(0);
     }
