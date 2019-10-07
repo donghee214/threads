@@ -265,13 +265,13 @@ thread_exit()
         exit(0);
     }
     int readyThreadTid = dequeueReadyThread();
-	
-    if(readyThreadTid == -1){
-       exit(0);
-    }
 	printf("EXITING: %d\n", currentlyRunningThreadTid);
 	printf("NEXT UP: \n");
 	printf("%d\n", readyThreadTid);
+    if(readyThreadTid == -1){
+       exit(0);
+    }
+
 	else{
 		threads[readyThreadTid]->status = RUNNING;
 		setcontext(&(threads[readyThreadTid]->context));
