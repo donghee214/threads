@@ -19,7 +19,7 @@ struct wait_queue {
 struct thread {
     Tid tid;
     ucontext_t context;
-    void *stack;
+    void *stack_address;
 	int setcontext_called;
     TStatus status;
 	/* ... Fill this in ... */
@@ -133,6 +133,11 @@ thread_id()
 }
 
 void thread_stub(void (*fn)(void *), void *arg){
+	for(int i = 0; i < THREAD_MAX_THREADS; i++){
+		if(threads[i]->status == KILLED){
+			thread_kill(threads[i]->tid);
+		}
+	}
 	interrupts_set(1);
     fn(arg);
     thread_exit();
@@ -149,7 +154,7 @@ thread_create(void (*fn) (void *), void *parg)
 	getcontext(&(newThread->context));
 	void *newStack = malloc(THREAD_MIN_STACK);
 	newThread->tid = new_tid;
-	newThread->stack = newStack;
+	newThread->stack_address = newStack;
 	newThread->status = READY;
 	newThread->setcontext_called = 0;
 	threads[new_tid] = newThread;
@@ -260,7 +265,6 @@ thread_exit()
 	else{
 		threads[readyThreadTid]->status = RUNNING;
 		setcontext(&(threads[readyThreadTid]->context));
-		
 	}
 
 }
@@ -268,13 +272,11 @@ thread_exit()
 Tid
 thread_kill(Tid tid)
 {
-		printf("KILLING");
         int currentlyRunningThread = search_threads(RUNNING ,-1);
         if(tid < 0 || tid == currentlyRunningThread || threads[tid] == NULL){
             return THREAD_INVALID;
         }
-        threads[tid]->status = KILLED;
-		free(threads[tid]->stack);
+		free(threads[tid]->stack_address);
         free(threads[tid]);
         threads[tid] = NULL;
         return tid;
