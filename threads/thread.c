@@ -260,7 +260,7 @@ thread_exit()
 {
 
     int currentlyRunningThreadTid = search_threads(RUNNING, -1);
-	printf("EXITING: %d\n", currentlyRunningThreadTid)
+	printf("EXITING: %d\n", currentlyRunningThreadTid);
 	printf("NEXT UP: \n");
 	printf("%d\n", readyThreadTid);
 	if (currentlyRunningThreadTid < 0){
