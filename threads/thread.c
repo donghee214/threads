@@ -258,8 +258,9 @@ thread_exit()
        exit(0);
     }
 	else{
-		setcontext(&(threads[readyThreadTid]->context));
 		threads[readyThreadTid]->status = RUNNING;
+		setcontext(&(threads[readyThreadTid]->context));
+		
 	}
 
 }
