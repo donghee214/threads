@@ -29,7 +29,7 @@ Tid readyQueue[THREAD_MAX_THREADS] = { [ 0 ... THREAD_MAX_THREADS-1 ] = -1 };
 int readyQueueSize = THREAD_MAX_THREADS;
 int size = 0;
 int last = 0;
-struct thread currRunningThread;
+struct thread currRunningThread*;
 // volatile int setcontextCalledThreads[THREAD_MAX_THREADS];
 struct thread *threads[THREAD_MAX_THREADS] = { NULL };
 
