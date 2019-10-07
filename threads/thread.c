@@ -227,7 +227,7 @@ thread_yield(Tid want_tid)
 	}
 	else{
 		if(threads[want_tid] == NULL){
-			return TREHAD_NONE;
+			return THREAD_NONE;
 		}
 		if(threads[want_tid]->status == KILLED){
 			dequeueIdReadyThread(want_tid);
