@@ -207,7 +207,7 @@ thread_yield(Tid want_tid)
 			threads[currentlyRunningThread]->status = READY;
 			threads[threadID]->status = RUNNING;
 			threads[currentlyRunningThread]->setcontext_called = 1;
-			printf("SWITCHING TO THREAD: %d", threadID)
+			printf("SWITCHING TO THREAD: %d", threadID);
 			setcontext(&(threads[threadID]->context));
 		}
 		else{
