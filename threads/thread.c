@@ -134,8 +134,10 @@ thread_id()
 
 void thread_stub(void (*fn)(void *), void *arg){
 	for(int i = 0; i < THREAD_MAX_THREADS; i++){
-		if(threads[i] != NULL && threads[i]->status == KILLED){
-			thread_kill(threads[i]->tid);
+		if(threads[i] != NULL){
+			if(threads[i]->status == KILLED){
+				thread_kill(threads[i]->tid);
+			}
 		}
 	}
 	interrupts_set(1);
