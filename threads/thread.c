@@ -98,11 +98,15 @@ search_threads(TStatus status, int searchForNull)
             continue;
         }
         if(threads[i]->status == status){
-			printf("\n%d:", i);
-			printf(" STATUS: %d", threads[i]->status);
             return i;
         }
     }
+	for(int i = 0; i < 300; i++){
+		if(threads[i] != NULL){
+			printf("\n%d: ", i);
+			printf("\n STATUS: %d", threads[i]->status);
+        }
+	}
 	printf("'CANT FIND THREAD");
     return -1;
 }
