@@ -184,7 +184,6 @@ thread_yield(Tid want_tid)
 		interrupts_set(interrupts_status);
 		return THREAD_INVALID;
 	}
-	displayReadyQueue();
 	if(want_tid == THREAD_ANY){
 		int threadID = readyQueue[0];
 		printf("current thread, %d", currentlyRunningThread);
