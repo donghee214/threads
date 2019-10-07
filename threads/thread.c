@@ -195,7 +195,7 @@ thread_yield(Tid want_tid)
 		return THREAD_INVALID;
 	}
 	if(threads[want_tid] == NULL){
-		return THREAD_INVALID;
+		return THREAD_NONE;
 	}
 	if(want_tid == THREAD_ANY){
 		int threadID = dequeueReadyThread();
