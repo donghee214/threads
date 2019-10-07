@@ -206,8 +206,8 @@ thread_yield(Tid want_tid)
 		queueReadyThread(currentlyRunningThread);
 		printf("current thread, %d", currentlyRunningThread);
 		printf("next threadId, %d\n", want_tid);
-		getcontext(&(threads[currentlyRunningThread]->context));
 		dequeueIdReadyThread(want_tid);
+		getcontext(&(threads[currentlyRunningThread]->context));
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			threads[currentlyRunningThread]->status = READY;
 			threads[want_tid]->status = RUNNING;
