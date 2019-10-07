@@ -102,13 +102,6 @@ search_threads(TStatus status, int searchForNull)
             return i;
         }
     }
-	for(int i = 0; i < 300; i++){
-		if(threads[i] != NULL){
-			printf("\n%d: ", i);
-			printf("\n STATUS: %d", threads[i]->status);
-        }
-	}
-	printf("'CANT FIND THREAD");
     return -1;
 }
 
@@ -150,7 +143,7 @@ thread_create(void (*fn) (void *), void *parg)
 {
 	int new_tid = search_threads(KILLED, 1);
 	if(new_tid == -1){
-            return THREAD_NOMORE;
+		return THREAD_NOMORE;
 	}
 	struct thread *newThread = (struct thread *)malloc(sizeof(struct thread));
 	getcontext(&(newThread->context));
@@ -265,13 +258,16 @@ thread_yield(Tid want_tid)
 void
 thread_exit()
 {
-	printf("EXITING, NEXT UP: ");
+
     int currentlyRunningThreadTid = search_threads(RUNNING, -1);
-    if (currentlyRunningThreadTid < 0){
+	printf("EXITING: %d\n", currentlyRunningThreadTid)
+	printf("NEXT UP: \n");
+	printf("%d\n", readyThreadTid);
+	if (currentlyRunningThreadTid < 0){
         exit(0);
     }
     int readyThreadTid = dequeueReadyThread();
-	printf("%d", readyThreadTid);
+	
     if(readyThreadTid == -1){
        exit(0);
     }
