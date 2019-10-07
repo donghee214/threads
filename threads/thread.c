@@ -133,13 +133,13 @@ thread_id()
 }
 
 void thread_stub(void (*fn)(void *), void *arg){
-	for(int i = 0; i < THREAD_MAX_THREADS; i++){
-		if(threads[i] != NULL){
-			if(threads[i]->status == KILLED){
-				thread_kill(threads[i]->tid);
-			}
-		}
-	}
+	// for(int i = 0; i < THREAD_MAX_THREADS; i++){
+	// 	if(threads[i] != NULL){
+	// 		if(threads[i]->status == KILLED){
+	// 			thread_kill(threads[i]->tid);
+	// 		}
+	// 	}
+	// }
 	interrupts_set(1);
     fn(arg);
     thread_exit();
@@ -270,7 +270,6 @@ thread_exit()
     if (currentlyRunningThreadTid < 0){
         exit(0);
     }
-
     int readyThreadTid = dequeueReadyThread();
 	printf("%d", readyThreadTid);
     if(readyThreadTid == -1){
