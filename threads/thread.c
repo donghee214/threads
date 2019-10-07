@@ -66,6 +66,8 @@ Tid dequeueReadyThread()
 
 Tid dequeueIdReadyThread(Tid id)
 {
+	printf("dequque id: %d\n", id);
+
 	for(int i = id; i < last; i++){
 		readyQueue[i] = readyQueue[i + 1];
 	}
