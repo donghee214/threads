@@ -165,7 +165,8 @@ void switch_thread(Tid currThreadID, Tid newThreadId)
 
 Tid
 thread_yield(Tid want_tid)
-{       
+{   
+	printf("want tid, %d\n", want_tid);
 	int interrupts_status = interrupts_set(0);
 	int currentlyRunningThread = search_threads(RUNNING, -1);
 	if (want_tid == THREAD_SELF){
