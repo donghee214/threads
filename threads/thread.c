@@ -194,9 +194,6 @@ thread_yield(Tid want_tid)
 		interrupts_set(interrupts_status);
 		return THREAD_INVALID;
 	}
-	if(threads[want_tid] == NULL){
-		return THREAD_NONE;
-	}
 	if(want_tid == THREAD_ANY){
 		int threadID = dequeueReadyThread();
 		printf("current thread, %d", currentlyRunningThread);
@@ -229,6 +226,9 @@ thread_yield(Tid want_tid)
 		}
 	}
 	else{
+		if(threads[want_tid] == NULL){
+			return TREHAD_NONE;
+		}
 		if(threads[want_tid]->status == KILLED){
 			dequeueIdReadyThread(want_tid);
 			free(threads[want_tid]->stack_address);
