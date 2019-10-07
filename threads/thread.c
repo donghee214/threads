@@ -260,9 +260,7 @@ thread_exit()
 {
 
     int currentlyRunningThreadTid = search_threads(RUNNING, -1);
-	printf("EXITING: %d\n", currentlyRunningThreadTid);
-	printf("NEXT UP: \n");
-	printf("%d\n", readyThreadTid);
+
 	if (currentlyRunningThreadTid < 0){
         exit(0);
     }
@@ -271,6 +269,9 @@ thread_exit()
     if(readyThreadTid == -1){
        exit(0);
     }
+	printf("EXITING: %d\n", currentlyRunningThreadTid);
+	printf("NEXT UP: \n");
+	printf("%d\n", readyThreadTid);
 	else{
 		threads[readyThreadTid]->status = RUNNING;
 		setcontext(&(threads[readyThreadTid]->context));
