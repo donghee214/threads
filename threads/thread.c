@@ -246,7 +246,7 @@ thread_yield(Tid want_tid)
 void
 thread_exit()
 {
-	// printf("EXITING");
+	printf("EXITING");
     int currentlyRunningThreadTid = search_threads(RUNNING, -1);
     if (currentlyRunningThreadTid < 0){
         exit(0);
@@ -266,6 +266,7 @@ thread_exit()
 Tid
 thread_kill(Tid tid)
 {
+		printf("KILLING");
         int currentlyRunningThread = search_threads(RUNNING ,-1);
         if(tid < 0 || tid == currentlyRunningThread || threads[tid] == NULL){
             return THREAD_INVALID;
