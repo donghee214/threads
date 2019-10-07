@@ -206,6 +206,12 @@ thread_yield(Tid want_tid)
 		int threadID = readyQueue[0];
 		printf("current thread, %d", currentlyRunningThread);
 		printf("threadId, %d\n", threadID);
+		while(threadID != -1 && threads[threadID]->status == KILLED){
+			free(threads[threadID]->stack_address);
+        	free(threads[threadID]);
+        	threads[threadID] = NULL;
+			threadID = dequeueReadyThread();
+		}
 		if(threadID == -1){
 			interrupts_set(interrupts_status);
 			return THREAD_NONE;
@@ -229,6 +235,13 @@ thread_yield(Tid want_tid)
 		}
 	}
 	else{
+		if(threads[want_tid]->status == KILLED){
+			dequeueIdReadyThread(want_tid);
+			free(threads[want_tid]->stack_address);
+        	free(threads[want_tid]);
+        	threads[want_tid] = NULL;
+			return currentlyRunningThread;
+		}
 		queueReadyThread(currentlyRunningThread);
 		printf("current thread, %d\n", currentlyRunningThread);
 		want_tid = dequeueIdReadyThread(want_tid);
@@ -259,7 +272,7 @@ thread_exit()
     if (currentlyRunningThreadTid < 0){
         exit(0);
     }
-    threads[currentlyRunningThreadTid]->status = KILLED;
+
     int readyThreadTid = dequeueReadyThread();
 	printf("%d", readyThreadTid);
     if(readyThreadTid == -1){
@@ -279,9 +292,7 @@ thread_kill(Tid tid)
         if(tid < 0 || tid == currentlyRunningThread || threads[tid] == NULL){
             return THREAD_INVALID;
         }
-		free(threads[tid]->stack_address);
-        free(threads[tid]);
-        threads[tid] = NULL;
+		threads[tid]->status = KILLED;
         return tid;
 }
 
