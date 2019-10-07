@@ -29,7 +29,7 @@ Tid readyQueue[THREAD_MAX_THREADS] = { [ 0 ... THREAD_MAX_THREADS-1 ] = -1 };
 int readyQueueSize = THREAD_MAX_THREADS;
 int size = 0;
 int last = 0;
-struct thread currRunningThread*;
+Tid currRunningThread;
 // volatile int setcontextCalledThreads[THREAD_MAX_THREADS];
 struct thread *threads[THREAD_MAX_THREADS] = { NULL };
 
@@ -119,7 +119,7 @@ thread_init(void)
     initialThread->tid = 0;
     initialThread->status = RUNNING;
     threads[0] = initialThread;
-	currRunningThread = initialThread;
+	currRunningThread = 0;
 }
 
 Tid
@@ -176,7 +176,7 @@ Tid
 thread_yield(Tid want_tid)
 {   
 	printf("want tid, %d\n", want_tid);
-	printf("curr running thread, %d", currRunningThread->tid);
+	printf("curr running thread, %d", currRunningThread);
 	int interrupts_status = interrupts_set(0);
 	int currentlyRunningThread = search_threads(RUNNING, -1);
 	if (want_tid == THREAD_SELF){
@@ -209,7 +209,7 @@ thread_yield(Tid want_tid)
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
 			threads[currentlyRunningThread]->status = READY;
 			threads[threadID]->status = RUNNING;
-			currRunningThread = threads[threadID];
+			currRunningThread = threadID;
 			threads[currentlyRunningThread]->setcontext_called = 1;
 			printf("SWITCHING TO THREAD: %d", threadID);
 			setcontext(&(threads[threadID]->context));
