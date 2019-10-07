@@ -253,7 +253,7 @@ thread_yield(Tid want_tid)
 void
 thread_exit()
 {
-	printf("EXITING, NEXT UP: ");
+	exit(0);
     int currentlyRunningThreadTid = search_threads(RUNNING, -1);
     if (currentlyRunningThreadTid < 0){
         exit(0);
