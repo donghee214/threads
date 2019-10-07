@@ -182,7 +182,6 @@ void switch_thread(Tid currThreadID, Tid newThreadId)
 Tid
 thread_yield(Tid want_tid)
 {   
-
 	printf("want tid, %d\n", want_tid);
 	int interrupts_status = interrupts_set(0);
 	int currentlyRunningThread = search_threads(RUNNING, -1);
@@ -203,7 +202,7 @@ thread_yield(Tid want_tid)
 		return THREAD_INVALID;
 	}
 	if(want_tid == THREAD_ANY){
-		int threadID = readyQueue[0];
+		int threadID = dequeueReadyThread();
 		printf("current thread, %d", currentlyRunningThread);
 		printf("threadId, %d\n", threadID);
 		while(threadID != -1 && threads[threadID]->status == KILLED){
@@ -216,7 +215,6 @@ thread_yield(Tid want_tid)
 			interrupts_set(interrupts_status);
 			return THREAD_NONE;
 		}
-		threadID = dequeueReadyThread();
 		queueReadyThread(currentlyRunningThread);
 		getcontext(&(threads[currentlyRunningThread]->context));
 		if(threads[currentlyRunningThread]->setcontext_called == 0){
