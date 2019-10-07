@@ -98,6 +98,8 @@ search_threads(TStatus status, int searchForNull)
             continue;
         }
         if(threads[i]->status == status){
+			printf("\n%d:", i);
+			printf(" STATUS: %d", threads[i]->status);
             return i;
         }
     }
