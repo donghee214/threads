@@ -67,7 +67,6 @@ Tid dequeueReadyThread()
 Tid dequeueIdReadyThread(Tid id)
 {
 	printf("dequque id: %d\n", id);
-
 	for(int i = id; i < last; i++){
 		readyQueue[i] = readyQueue[i + 1];
 	}
@@ -77,7 +76,7 @@ Tid dequeueIdReadyThread(Tid id)
 }
 
 void displayReadyQueue(){
-	for(int i = 0; i < 200; i++){
+	for(int i = 0; i < 10; i++){
 		printf("%d", readyQueue[i]);
 	}
 }
@@ -179,7 +178,7 @@ thread_yield(Tid want_tid)
 		interrupts_set(interrupts_status);
 		return THREAD_INVALID;
 	}
-	
+	displayReadyQueue();
 	if(want_tid == THREAD_ANY){
 		int threadID = readyQueue[0];
 		printf("current thread, %d", currentlyRunningThread);
