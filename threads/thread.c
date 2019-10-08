@@ -20,7 +20,7 @@ struct thread {
     Tid tid;
     ucontext_t context;
     void *stack_address;
-	int setcontext_called;
+    int setcontext_called;
     TStatus status;
 	/* ... Fill this in ... */
 };
@@ -33,17 +33,14 @@ Tid currRunningThread;
 // volatile int setcontextCalledThreads[THREAD_MAX_THREADS];
 struct thread *threads[THREAD_MAX_THREADS] = { NULL };
 
+
 void queueReadyThread(Tid tid)
-{
-    if(size < THREAD_MAX_THREADS)
-    {
-        readyQueue[last] = tid;
-        last++;
-        size++;
-    }
-    else
-    {
-        printf("Queue is full\n");
+{ 
+    for(int i = 0; i < THREAD_MAX_THREADS; i++){
+        if(readyQueue[i] == -1){
+            readyQueue[i] = tid;
+            break;
+        }
     }
 }
 
@@ -53,39 +50,35 @@ Tid showNextReadyThread(){
 
 Tid dequeueReadyThread()
 {
-	int ret = readyQueue[0];
-	if(ret == -1){
-		return -1;
-	}
-	for(int i = 0; i < last; i++){
-		readyQueue[i] = readyQueue[i + 1];
-	}
-	last--;
-	size--;
-	return ret;
+    int ret = readyQueue[0];
+    if(ret == -1){
+            return -1;
+    }
+    for(int i = 0; i < THREAD_MAX_THREADS - 1; i++){
+        readyQueue[i] = readyQueue[i + 1];
+        if(i == 1022){
+            readyQueue[1023] = -1;
+        }
+    }
+    return ret;
 }
 
 Tid dequeueIdReadyThread(Tid id)
 {
-	printf("dequque id: %d\n", id);
+//	printf("dequque id: %d\n", id);
 	int index = -1;
-	for(int i = 0; i < last; i++){
-		if(readyQueue[i] == id){
-			index = i;
-		}
+	for(int i = 0; i < THREAD_MAX_THREADS; i++){
+            if(readyQueue[i] == id){
+                index = i;
+            }
 	}
-	for(int j = index; j < last; j++){
-		readyQueue[j] = readyQueue[j + 1];
+	for(int j = index; j < THREAD_MAX_THREADS - 1; j++){
+            readyQueue[j] = readyQueue[j + 1];
+            if(j == 1022){
+                readyQueue[1023] = -1;
+            }
 	}
-	last --;
-	size --;
 	return id;
-}
-
-void displayReadyQueue(){
-	for(int i = 0; i < 10; i++){
-		printf("%d", readyQueue[i]);
-	}
 }
 
 Tid
@@ -111,29 +104,36 @@ thread_init(void)
     struct thread *initialThread = (struct thread *)malloc(sizeof(struct thread));
     initialThread->tid = 0;
     initialThread->status = RUNNING;
+    initialThread->setcontext_called = 0;
     threads[0] = initialThread;
-	currRunningThread = 0;
+    currRunningThread = 0;
 }
 
 Tid
 thread_id()
 {
-    int currentlyRunningThread = search_threads(RUNNING, -1);
-    if(currentlyRunningThread == -1){
-        return 0;
-    }
-    return currentlyRunningThread;
+//    int currentlyRunningThread = search_threads(RUNNING, -1);
+//    if(currentlyRunningThread == -1){
+//        return 0;
+//    }
+    return currRunningThread;
 }
 
 void thread_stub(void (*fn)(void *), void *arg){
-	// for(int i = 0; i < THREAD_MAX_THREADS; i++){
-	// 	if(threads[i] != NULL){
-	// 		if(threads[i]->status == KILLED){
-	// 			thread_kill(threads[i]->tid);
-	// 		}
-	// 	}
-	// }
-	interrupts_set(1);
+    for(int i = 0; i < THREAD_MAX_THREADS; i++){
+        if(threads[i] != NULL){
+             if(threads[i]->status == KILLED){
+//                 if(threads[i]->tid == 0){
+//                     printf("uh oh");
+//                     exit(0);
+//                 }
+//                dequeueIdReadyThread(threads[i]->tid);
+                free(threads[i]->stack_address);
+                free(threads[i]);
+                threads[i] = NULL;
+             }
+        }
+    }
     fn(arg);
     thread_exit();
 }
@@ -143,11 +143,15 @@ thread_create(void (*fn) (void *), void *parg)
 {
 	int new_tid = search_threads(KILLED, 1);
 	if(new_tid == -1){
-		return THREAD_NOMORE;
+            return THREAD_NOMORE;
 	}
 	struct thread *newThread = (struct thread *)malloc(sizeof(struct thread));
 	getcontext(&(newThread->context));
 	void *newStack = malloc(THREAD_MIN_STACK);
+        if(newStack == NULL){
+            free(newThread);
+            return THREAD_NOMEMORY;
+        }
 	newThread->tid = new_tid;
 	newThread->stack_address = newStack;
 	newThread->status = READY;
@@ -155,7 +159,6 @@ thread_create(void (*fn) (void *), void *parg)
 	threads[new_tid] = newThread;
 	threads[new_tid]->context.uc_mcontext.gregs[REG_RIP] = (long long int)&thread_stub;
 	threads[new_tid]->context.uc_mcontext.gregs[REG_RSP] = (long long int)newStack + THREAD_MIN_STACK - 8;
-	threads[new_tid]->context.uc_stack.ss_sp = newStack;
 	threads[new_tid]->context.uc_stack.ss_size = THREAD_MIN_STACK - 8;
 	threads[new_tid]->context.uc_mcontext.gregs[REG_RDI] = (long long int)(fn);
 	threads[new_tid]->context.uc_mcontext.gregs[REG_RSI] = (long long int)(parg);
@@ -163,133 +166,120 @@ thread_create(void (*fn) (void *), void *parg)
 	return new_tid;
 }
 
-void switch_thread(Tid currThreadID, Tid newThreadId)
-{
-    queueReadyThread(currThreadID);
-    getcontext(&(threads[currThreadID]->context));
-    threads[currThreadID]->status = READY;
-    threads[newThreadId]->status = RUNNING;
-    setcontext(&(threads[newThreadId]->context));
-}
-
 Tid
 thread_yield(Tid want_tid)
 {   
-	printf("want tid, %d\n", want_tid);
-	int interrupts_status = interrupts_set(0);
-	int currentlyRunningThread = search_threads(RUNNING, -1);
+//           displayReadyQueue();
+//	int currentlyRunningThread = search_threads(RUNNING, -1);
 	if (want_tid == THREAD_SELF){
-		interrupts_set(interrupts_status);
-		return currentlyRunningThread;
+		return currRunningThread;
 	}
-	if (want_tid == currentlyRunningThread){
-		interrupts_set(interrupts_status);
-		return currentlyRunningThread;
+	if (want_tid == currRunningThread){
+		return currRunningThread;
 	}
 	if (want_tid < -2 || want_tid > THREAD_MAX_THREADS){
-		interrupts_set(interrupts_status);
 		return THREAD_INVALID;
 	}
 	if (want_tid > 0 && threads[want_tid] == NULL){
-		interrupts_set(interrupts_status);
 		return THREAD_INVALID;
 	}
 	if(want_tid == THREAD_ANY){
-		int threadID = dequeueReadyThread();
-		printf("current thread, %d", currentlyRunningThread);
-		printf("threadId, %d\n", threadID);
-		while(threadID != -1 && threads[threadID]->status == KILLED){
-			free(threads[threadID]->stack_address);
-        	free(threads[threadID]);
-        	threads[threadID] = NULL;
-			threadID = dequeueReadyThread();
-		}
-		if(threadID == -1){
-			interrupts_set(interrupts_status);
-			return THREAD_NONE;
-		}
-		queueReadyThread(currentlyRunningThread);
-		getcontext(&(threads[currentlyRunningThread]->context));
-		if(threads[currentlyRunningThread]->setcontext_called == 0){
-			threads[currentlyRunningThread]->status = READY;
-			threads[threadID]->status = RUNNING;
-			currRunningThread = threadID;
-			threads[currentlyRunningThread]->setcontext_called = 1;
-			printf("SWITCHING TO THREAD: %d\n", threadID);
-			setcontext(&(threads[threadID]->context));
-		}
-		else{
-			assert(!interrupts_enabled());
-			threads[currentlyRunningThread]->setcontext_called = 0;
-			interrupts_set(interrupts_status);
-			return threadID;
-		}
+            int threadID = dequeueReadyThread();
+//            printf("current thread, %d", currRunningThread);
+//            printf("threadId, %d\n", threadID);
+            while(threadID != -1 && threads[threadID]->status == KILLED){
+//                if(threadID == 0){
+//                    printf("uh oh2");
+//                    exit(0);
+//                }
+//                dequeueIdReadyThread(threadID);
+                free(threads[threadID]->stack_address);
+                free(threads[threadID]);
+                threads[threadID] = NULL;
+                threadID = dequeueReadyThread();
+            }
+            if(threadID == -1){
+                    return THREAD_NONE;
+            }
+            queueReadyThread(currRunningThread);
+            getcontext(&(threads[currRunningThread]->context));
+            if(threads[currRunningThread]->setcontext_called == 0){
+                threads[currRunningThread]->setcontext_called = 1;
+                currRunningThread = threadID;
+//                printf("SWITCHING TO THREAD: %d\n", threadID);
+                setcontext(&(threads[threadID]->context));
+            }
+            else{
+                threads[currRunningThread]->setcontext_called = 0;
+                return threadID;
+            }
 	}
 	else{
-		if(threads[want_tid] == NULL){
-			return THREAD_NONE;
-		}
-		if(threads[want_tid]->status == KILLED){
-			dequeueIdReadyThread(want_tid);
-			free(threads[want_tid]->stack_address);
-        	free(threads[want_tid]);
-        	threads[want_tid] = NULL;
-			return currentlyRunningThread;
-		}
-		queueReadyThread(currentlyRunningThread);
-		printf("current thread, %d\n", currentlyRunningThread);
-		want_tid = dequeueIdReadyThread(want_tid);
-		printf("next threadId, %d\n", want_tid);
-		getcontext(&(threads[currentlyRunningThread]->context));
-		if(threads[currentlyRunningThread]->setcontext_called == 0){
-			threads[currentlyRunningThread]->status = READY;
-			threads[want_tid]->status = RUNNING;
-			threads[currentlyRunningThread]->setcontext_called = 1;
-			printf("about to switch to, %d", want_tid);
-			setcontext(&(threads[want_tid]->context));
-		}
-		else{
-			threads[currentlyRunningThread]->setcontext_called = 0;
-			interrupts_set(interrupts_status);
-			return want_tid;
-		}
+            if(threads[want_tid] == NULL){
+                return THREAD_NONE;
+            }
+            if(threads[want_tid]->status == KILLED){
+                dequeueIdReadyThread(want_tid);
+                free(threads[want_tid]->stack_address);
+                free(threads[want_tid]);
+                threads[want_tid] = NULL;
+                return THREAD_INVALID;
+            }
+            queueReadyThread(currRunningThread);
+            want_tid = dequeueIdReadyThread(want_tid);
+            getcontext(&(threads[currRunningThread]->context));
+//            printf("current thread, %d\n", currRunningThread);
+//            printf("next threadId, %d\n", want_tid);
+            if(threads[currRunningThread]->setcontext_called == 0){
+                threads[currRunningThread]->setcontext_called = 1;
+                currRunningThread = want_tid;
+//                printf("about to switch to, %d", want_tid);
+                setcontext(&(threads[want_tid]->context));
+            }
+            else{
+                threads[currRunningThread]->setcontext_called = 0;
+
+                return want_tid;
+            }
 	}
-	interrupts_set(interrupts_status);
 	return THREAD_NONE;
 }
 
 void
 thread_exit()
 {
-
-    int currentlyRunningThreadTid = search_threads(RUNNING, -1);
-
-	if (currentlyRunningThreadTid < 0){
+    if (currRunningThread < 0){
         exit(0);
     }
     int readyThreadTid = dequeueReadyThread();
-	printf("EXITING: %d\n", currentlyRunningThreadTid);
-	printf("NEXT UP: \n");
-	printf("%d\n", readyThreadTid);
+//    printf("EXITING: %d\n", currRunningThread);
+//    printf("NEXT UP: %d\n",  readyThreadTid);    
+    while(threads[readyThreadTid] == NULL || threads[readyThreadTid]->status == KILLED){
+        readyThreadTid = dequeueReadyThread();
+        if(readyThreadTid == -1){
+            break;
+        }
+    }
+
+//    displayThreads();
     if(readyThreadTid == -1){
        exit(0);
     }
-
-	else{
-		threads[readyThreadTid]->status = RUNNING;
-		setcontext(&(threads[readyThreadTid]->context));
-	}
+    else{
+        threads[currRunningThread]->status = KILLED;
+        currRunningThread = readyThreadTid;
+        setcontext(&(threads[readyThreadTid]->context));
+    }
 
 }
 
 Tid
 thread_kill(Tid tid)
 {
-        int currentlyRunningThread = search_threads(RUNNING ,-1);
-        if(tid < 0 || tid == currentlyRunningThread || threads[tid] == NULL){
+        if(tid < 0 || tid == currRunningThread || threads[tid] == NULL || tid > THREAD_MAX_THREADS){
             return THREAD_INVALID;
         }
-		threads[tid]->status = KILLED;
+        threads[tid]->status = KILLED;
         return tid;
 }
 
